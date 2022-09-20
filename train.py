@@ -46,7 +46,7 @@ ap.add_argument("-p", "--plot", type=str, default="plot.png",
 	help="path to output loss/accuracy plot")
 args = vars(ap.parse_args())
 
-print("[INFO] loading images")
+print("[INFO] loading images...")
 
 #alle Dateipfade werden in einer Liste gespeichert
 imagePaths = list(paths.list_images(args["dataset"]))
