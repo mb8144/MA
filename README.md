@@ -1,2 +1,0 @@
-# MA
-basketball classification task
