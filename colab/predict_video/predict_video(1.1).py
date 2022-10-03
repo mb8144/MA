@@ -75,7 +75,7 @@ while True:
 	label = lb.classes_[i]
 
 	# draw the activity on the output frame
-	text = "activity: {}".format(label)
+	text = "result: {}".format(label)
 	cv2.putText(output, text, (35, 50), cv2.FONT_HERSHEY_SIMPLEX,
 				1.25, (0, 255, 0), 5)
 	# check if the video writer is None
