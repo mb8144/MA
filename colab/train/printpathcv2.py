@@ -134,7 +134,7 @@ for layer in baseModel.layers:
 #Da nur 2 Klassen, wird binary_crossentropy benutzt
 
 print("[INFO] compiling model...")
-opt = SGD(lr=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
+opt = SGD(learning_rate=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
 model.compile(loss="binary_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
