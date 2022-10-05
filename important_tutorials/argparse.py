@@ -1,4 +1,4 @@
-""" Dieses Skript wurde von YouTube mitgeschrieben, um die Funktion der Library argparse zu verstehen
+""" Dieses Skript wurde von YouTube mitgeschrieben, um die Funktion der Library argparse verstehen
 und anwenden zu können.""" 
 
 import argparse
