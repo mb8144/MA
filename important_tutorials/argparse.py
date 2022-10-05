@@ -1,3 +1,6 @@
+# Dieses Skript wurde von YouTube mitgeschrieben, um die Funktion der Library argparse zu verstehen und
+# anwenden zu können. 
+
 import argparse
 
 parser = argparse.ArgumentParser(description= "calculates number")
