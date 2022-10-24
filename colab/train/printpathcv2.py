@@ -1,16 +1,14 @@
 '''
 Beschreibung: basketball classification (MA)
 Author:	Maurus Brunnschweiler
-Datum: 
-Version: 1
 '''
 
-# set the matplotlib backend so figures can be saved in the background
+# matplotlib importieren für backend Aktionen
 import matplotlib
 print(matplotlib.__version__)
 matplotlib.use("Agg")
-#TODO herausfinden, was line 10 geanu bedeutet
-#import the necessary packages
+
+# Alle nötigen Libraries werden importiert
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.layers import AveragePooling2D
 from tensorflow.keras.applications import ResNet50
@@ -33,7 +31,7 @@ import os
 
 print("[INFO] Test: The program is running...")
 
-# construct the argument parser and parse the arguments
+# Argument-Parser wird initialisiert
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--dataset", required=True,
 	help="path to input dataset")
@@ -49,31 +47,34 @@ args = vars(ap.parse_args())
 
 print("[INFO] loading images...")
 
-#alle Dateipfade werden in einer Liste gespeichert
+# alle Dateipfade werden in einer Liste gespeichert
 imagePaths = list(paths.list_images(args["dataset"]))
+# Test ob beide Klassen in Liste sind
 randommiss = imagePaths[-100]
 print(randommiss)
+
 data = []
 labels = []
 
 for imagePath in imagePaths:
   print(imagePath)
-#Label wird aus Dateiname entnommen
-#TODO label in Name einbinden
 
+# Label wird aus Dateiname entnommen
   label = imagePath.split(os.path.sep)[-2]
   print(label)
-# /Users/maurusbrunnschweiler/Desktop/test1
-# vielleicht: label = imagePath[]
 
+# Bild wird gelesen und in (224, 224) umgeformt
+# auf aspect ratio wird vorest verzichtet	
+  img_size = 224
   image = cv2.imread(imagePath)
   image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-  image = cv2.resize(image, (224, 224))
+  image = cv2.resize(image, (img_size, img_size))
 
-#Updaten der Listen 'data' und 'labels'
+# Hinzufügen des Bildes in entsprechende Liste
   data.append(image)
   labels.append(label)
-#Konvertieren der Listen in NumPy Arrays
+
+# Konvertieren der Listen in NumPy Arrays
 data = np.array(data)
 labels = np.array(labels)
 
@@ -81,7 +82,7 @@ labels = np.array(labels)
 lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
 
-#Datensatz 'data' wird aufgeteilt in Trainingsdatenstz(75%) und Testdatensatz(25%)
+# Aufteilung in Trainingsdatenstz(75%) und Testdatensatz(25%)
 (trainX, testX, trainY, testY) = train_test_split(data, labels,
 	test_size=0.25, stratify=labels, random_state=42)
 
@@ -95,23 +96,25 @@ trainAug = ImageDataGenerator(
 	horizontal_flip=True,
 	fill_mode="nearest")
 
-# initialize the validation/testing data augmentation object (which
-# we'll be adding mean subtraction to)
+# Inititalisierung des 'testing data augmentation' Objekts
+# zudem 'mean-substraction'
 valAug = ImageDataGenerator()
 # define the ImageNet mean subtraction (in RGB order) and set the
 # mean subtraction value for each of the data augmentation
 # objects
+
+# Festlegung der 'mean subtraction' von ImageNet für data augmentation
 mean = np.array([123.68, 116.779, 103.939], dtype="float32")
 trainAug.mean = mean
 valAug.mean = mean
 
-# load the ResNet-50 network, ensuring the head FC layer sets are left off
-#TODO Was ist ein head FC layer?
+# ResNet-50 network wird geladen(Transfer Learning)
+# FC Layer wird bewusst weggelassen
+
 baseModel = ResNet50(weights="imagenet", include_top=False,
 	input_tensor=Input(shape=(224, 224, 3)))
 
-# construct the head of the model that will be placed on top of the
-# base model
+# Festlegung des 'headModel', welches auf 'baseModel'(ResNet-50) gesetzt wird
 headModel = baseModel.output
 headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
 headModel = Flatten(name="flatten")(headModel)
@@ -119,8 +122,8 @@ headModel = Dense(512, activation="relu")(headModel)
 headModel = Dropout(0.5)(headModel)
 headModel = Dense(len(lb.classes_), activation="softmax")(headModel)
 
-# place the head FC model on top of the base model (this will become
-# the actual model we will train)
+# FC Modell wird auf 'baseModel' gesetzt
+# finales Modell entsteht
 model = Model(inputs=baseModel.input, outputs=headModel)
 
 # loop over all layers in the base model and freeze them so they will
@@ -128,19 +131,17 @@ model = Model(inputs=baseModel.input, outputs=headModel)
 for layer in baseModel.layers:
 	layer.trainable = False
 
-# compile our model (this needs to be done after our setting our
-# layers to being non-trainable)
-#TODO Was ist [INFO]?
-#Da nur 2 Klassen, wird binary_crossentropy benutzt
+# compile model(erstellen des Modells)
+# Da nur 2 Klassen, wird binary_crossentropy verwendet
 
 print("[INFO] compiling model...")
 opt = SGD(learning_rate=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
 model.compile(loss="binary_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
-# train the head of the network for a few epochs (all other layers
-# are frozen) -- this will allow the new FC layers to start to become
-# initialized with actual "learned" values versus pure random
+# Trainieren des FC Modells für einige Epochen, alle anderen Layers sind
+# "eingefroren", dies ermöglicht dem FC Modell, mit richtigen 
+# "gelernten" Werten initialisiert zu werden im Vergleich zu random Werten
 print("[INFO] training head...")
 H = model.fit(
 	x=trainAug.flow(trainX, trainY, batch_size=32),
@@ -149,12 +150,13 @@ H = model.fit(
 	validation_steps=len(testX) // 32,
 	epochs=args["epochs"])
 
-# evaluate the network
+# Evaluiren des Netzes
 print("[INFO] evaluating network...")
 predictions = model.predict(x=testX.astype("float32"), batch_size=32)
 print(classification_report(testY.argmax(axis=1),
 	predictions.argmax(axis=1), target_names=lb.classes_))
-# plot the training loss and accuracy
+
+# Darstellen des Fehlers und der Wahrscheindlichkeit
 N = args["epochs"]
 plt.style.use("ggplot")
 plt.figure()
@@ -168,10 +170,11 @@ plt.ylabel("Loss/Accuracy")
 plt.legend(loc="lower left")
 plt.savefig(args["plot"])
 
-# serialize the model to disk
+# Serialisieren des Modells auf Colab
 print("[INFO] serializing network...")
 model.save(args["model"], save_format="h5")
-# serialize the label binarizer to disk
+
+# Serialisieren des Label-Binarizers auf Colab
 f = open(args["label_bin"], "wb")
 f.write(pickle.dumps(lb))
 f.close()
