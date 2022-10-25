@@ -1,13 +1,9 @@
 '''
 Beschreibung: basketball classification (MA)
 Author:	Maurus Brunnschweiler
-Datum: 22.08.22 - 20.09.22
-Version: 1.1 
-Anpassung cv2_imshow(img)
-Lösung mit <output>
 '''
 
-# import the necessary packages
+# Alle nötigen Libraries werden importiert
 from tensorflow.keras.models import load_model
 from collections import deque
 import numpy as np
@@ -15,7 +11,8 @@ import argparse
 import pickle
 import cv2
 from google.colab.patches import cv2_imshow
-# construct the argument parser and parse the arguments
+
+# Argument-Parser wird initialisiert
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", required=True,
 	help="path to trained serialized model")
@@ -30,71 +27,71 @@ ap.add_argument("-s", "--size", type=int, default=128,
 args = vars(ap.parse_args())
 
 
-# load the trained model and label binarizer from disk
+# trainiertes Modell und Label-Binarizer werden hochgeladen
 print("[INFO] loading model and label binarizer...")
 model = load_model(args["model"])
 lb = pickle.loads(open(args["label_bin"], "rb").read())
-# initialize the image mean for mean subtraction along with the
-# predictions queue
+# 'image mean' für 'mean subtraction' wird definiert und
+# Queue(deutsch: "Reihe") wird initialisiert
 mean = np.array([123.68, 116.779, 103.939][::1], dtype="float32")
 Q = deque(maxlen=args["size"])
 
-# initialize the video stream, pointer to output video file, and
-# frame dimensions
+# Videostream wird initalisiert und Frames gelesen
+# Dimensionen werden mit 'None' initialisiert
 vs = cv2.VideoCapture(args["input"])
 writer = None
 (W, H) = (None, None)
-# loop over frames from the video file stream
+# Aktionen werden für jeden Frame ausgeführt
 while True:
-	# read the next frame from the file
+	# nächster Frame wird abgelesen
 	(grabbed, frame) = vs.read()
-	# if the frame was not grabbed, then we have reached the end
-	# of the stream
+	# Schluss, wenn kei Frame mehr erkennt wird
 	if not grabbed:
 		break
-	# if the frame dimensions are empty, grab them
+	
+	# wenn nötig werden Dimensionen festgelegt
 	if W is None or H is None:
 		(H, W) = frame.shape[:2]
 
-	# clone the output frame, then convert it from BGR to RGB
-	# ordering, resize the frame to a fixed 224x224, and then
-	# perform mean subtraction
+	# Frame wird kopiert und bearbeitet inklusive 'mean
+	# subtraction'
+	img_size = 224
 	output = frame.copy()
 	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-	frame = cv2.resize(frame, (224, 224)).astype("float32")
+	frame = cv2.resize(frame, (img_size, img_size)).astype("float32")
 	frame -= mean
 
-	# make predictions on the frame and then update the predictions
-	# queue
+	# Vorhersage für Klassifizierung wird gemacht für den
+	# einzelnen Frame und die Queue aktualisiert
 	preds = model.predict(np.expand_dims(frame, axis=0))[0]
 	Q.append(preds)
-	# perform prediction averaging over the current history of
-	# previous predictions
+	# 'Prediction Averaging' wird auf aktueller Queue durchgeführt
+	# und Klasse zugeordnet
 	results = np.array(Q).mean(axis=0)
 	i = np.argmax(results)
 	label = lb.classes_[i]
 
-	# draw the activity on the output frame
+	# Klasse wird graphisch auf Video ausgegeben
 	text = "result: {}".format(label)
 	cv2.putText(output, text, (35, 50), cv2.FONT_HERSHEY_SIMPLEX,
 				1.25, (0, 255, 0), 5)
-	# check if the video writer is None
+	# Prüfen, ob writer None ist
 	if writer is None:
-		# initialize our video writer
+		# 'Video Writer' wird initialisiert
 		fourcc = cv2.VideoWriter_fourcc(*"MJPG")
 		writer = cv2.VideoWriter(args["output"], fourcc, 30,
 								 (W, H), True)
-	# write the output frame to disk
+	# Output-Frame wird gesichert
 	writer.write(output)
-	# show the output image
+	# Output-Frame wird gezeigt
 	cv2_imshow( output)
 	key = cv2.waitKey(1) & 0xFF
-	# if the `q` key was pressed, break from the loop
+	# wenn 'q' gedrückt wird: Abbruch
 	if key == ord("q"):
 		break
-# release the file pointers
+
 print("[INFO] cleaning up...")
-# l.96 ist sehr kritisch, hat zuerst mit nicht funktioniert!
+# sehr kritisch, hat zuerst mit nicht funktioniert!
 writer.release()
 vs.release()
 print("[INFO] The program has reached its end...")
