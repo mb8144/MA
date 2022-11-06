@@ -48,7 +48,7 @@ args = vars(ap.parse_args())
 print("[INFO] loading images...")
 
 # alle Dateipfade werden in einer Liste gespeichert
-imagePaths = list(paths.list_images(args["dataset"]))
+image_paths = list(paths.list_images(args["dataset"]))
 # Test ob beide Klassen in Liste sind
 randommiss = imagePaths[-100]
 print(randommiss)
@@ -56,23 +56,27 @@ print(randommiss)
 data = []
 labels = []
 
-for imagePath in imagePaths:
+for image_path in image_paths:
   print(imagePath)
 
 # Label wird aus Dateiname entnommen
   label = imagePath.split(os.path.sep)[-2]
-  print(label)
 
 # Bild wird gelesen und in (224, 224) umgeformt
-# auf aspect ratio wird vorest verzichtet	
-  img_size = 224
-  image = cv2.imread(imagePath)
-  image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-  image = cv2.resize(image, (img_size, img_size))
+# auf aspect ratio wird vorest verzichtet
+  try:
+   img_size = 224
+   image = cv2.imread(image_path)
+   image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+   image = cv2.resize(image, (img_size, img_size))
 
 # Hinzufügen des Bildes in entsprechende Liste
-  data.append(image)
-  labels.append(label)
+   data.append(image)
+   labels.append(label)
+    
+  except:
+    print(f"{image_path} is not working.")
+                
 
 # Konvertieren der Listen in NumPy Arrays
 data = np.array(data)
