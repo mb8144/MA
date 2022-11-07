@@ -50,17 +50,17 @@ print("[INFO] loading images...")
 # alle Dateipfade werden in einer Liste gespeichert
 image_paths = list(paths.list_images(args["dataset"]))
 # Test ob beide Klassen in Liste sind
-randommiss = imagePaths[-100]
+randommiss = image_paths[-100]
 print(randommiss)
 
 data = []
 labels = []
 
 for image_path in image_paths:
-  print(imagePath)
+  print(image_path)
 
 # Label wird aus Dateiname entnommen
-  label = imagePath.split(os.path.sep)[-2]
+  label = image_path.split(os.path.sep)[-2]
 
 # Bild wird gelesen und in (224, 224) umgeformt
 # auf aspect ratio wird vorest verzichtet
