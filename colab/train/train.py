@@ -114,7 +114,6 @@ valAug.mean = mean
 
 # ResNet-50 network wird geladen(Transfer Learning)
 # FC Layer wird bewusst weggelassen
-
 baseModel = ResNet50(weights="imagenet", include_top=False,
 	input_tensor=Input(shape=(224, 224, 3)))
 
@@ -154,7 +153,7 @@ H = model.fit(
 	validation_steps=len(testX) // 32,
 	epochs=args["epochs"])
 
-# Evaluiren des Netzes
+# Evaluieren des Netzes
 print("[INFO] evaluating network...")
 predictions = model.predict(x=testX.astype("float32"), batch_size=32)
 print(classification_report(testY.argmax(axis=1),
