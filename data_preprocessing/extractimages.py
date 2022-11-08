@@ -2,7 +2,6 @@
 Skript für das Extrahieren der einzelnen Frames aus
 Videos.
 """
-
 import cv2
 import os
 
