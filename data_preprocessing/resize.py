@@ -1,7 +1,7 @@
 """
 Skript wurde erstellt, um alle Bilder
-des finalen Datensets(ca. 19'000) mit der Grösse (224, 224)zu
-komprimierern.
+des finalen Datensets(ca. 19'000) mit der Grösse (224, 224)
+zu komprimierern.
 """
 import cv2
 import glob
