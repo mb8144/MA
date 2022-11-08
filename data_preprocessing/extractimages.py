@@ -14,8 +14,8 @@ for files in os.listdir(pathofinputdir):
     vidcap = cv2.VideoCapture(os.path.join(pathofinputdir, files))
     success, image = vidcap.read()
 
-    # 'success' erkennt, ob frames erstellbar sind und image
-    # ist ein einzelner Frame.
+    # 'success' erkennt, ob Frames erstellbar sind und image
+    # ist ein einzelner Frame
     print(success)
     while success:
         success, image = vidcap.read()
