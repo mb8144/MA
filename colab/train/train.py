@@ -1,6 +1,7 @@
 '''
 Beschreibung: basketball classification (MA)
 Author:	Maurus Brunnschweiler
+Pyimageresearch Tutorial
 '''
 
 # matplotlib importieren für backend Aktionen
