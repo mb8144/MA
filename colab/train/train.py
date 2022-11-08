@@ -115,7 +115,7 @@ valAug.mean = mean
 # ResNet-50 network wird geladen(Transfer Learning)
 # FC Layer wird bewusst weggelassen
 baseModel = ResNet50(weights="imagenet", include_top=False,
-	input_tensor=Input(shape=(224, 224, 3)))
+	input_tensor=Input(shape=(img_size, img_size, 3)))
 
 # Festlegung des 'headModel', welches auf 'baseModel'(ResNet-50) gesetzt wird
 headModel = baseModel.output
