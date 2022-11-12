@@ -58,7 +58,6 @@ data = []
 labels = []
 
 for image_path in image_paths:
-  print(image_path)
 
 # Label wird aus Dateiname entnommen
   label = image_path.split(os.path.sep)[-2]
