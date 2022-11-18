@@ -59,7 +59,7 @@ labels = []
 
 for image_path in image_paths:
 
-# Label wird aus Dateiname entnommen
+# Label (make oder miss) wird aus Dateiname entnommen
   label = image_path.split(os.path.sep)[-2]
 
 # Bild wird gelesen und in (224, 224) umgeformt
@@ -70,7 +70,8 @@ for image_path in image_paths:
    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
    image = cv2.resize(image, (img_size, img_size))
 
-# Hinzufügen des Bildes in entsprechende Liste
+# Hinzufügen des Bildes und dessen Klasse
+# in entsprechende Liste
    data.append(image)
    labels.append(label)
     
@@ -87,6 +88,7 @@ lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
 
 # Aufteilung in Trainingsdatenstz(75%) und Testdatensatz(25%)
+# unterschiedliche random_state Werte werden ausprobiert 
 (trainX, testX, trainY, testY) = train_test_split(data, labels,
 	test_size=0.25, stratify=labels, random_state=42)
 
@@ -113,11 +115,12 @@ trainAug.mean = mean
 valAug.mean = mean
 
 # ResNet-50 network wird geladen(Transfer Learning)
-# FC Layer wird bewusst weggelassen
+# FC Layer wird bewusst weggelassen, damit man
+# es selbst bestimmen kann
 baseModel = ResNet50(weights="imagenet", include_top=False,
 	input_tensor=Input(shape=(224, 224, 3)))
 
-# Festlegung des 'headModel', welches auf 'baseModel'(ResNet-50) gesetzt wird
+# Festlegung des 'headModel', welches an 'baseModel'(ResNet-50) angehängt wird
 headModel = baseModel.output
 headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
 headModel = Flatten(name="flatten")(headModel)
@@ -125,7 +128,7 @@ headModel = Dense(512, activation="relu")(headModel)
 headModel = Dropout(0.5)(headModel)
 headModel = Dense(len(lb.classes_), activation="softmax")(headModel)
 
-# FC Modell wird auf 'baseModel' gesetzt
+# FC Modell an 'baseModel' angehängt
 # finales Modell entsteht
 model = Model(inputs=baseModel.input, outputs=headModel)
 
@@ -134,23 +137,26 @@ model = Model(inputs=baseModel.input, outputs=headModel)
 for layer in baseModel.layers:
 	layer.trainable = False
 
-# compile model(erstellen des Modells)
-# Da nur 2 Klassen, wird binary_crossentropy verwendet
+opt = SGD(learning_rate=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
+# compile model(Erstellen des Modells)
+# einige der Hyperparameter werden hier festgelegt
 
 print("[INFO] compiling model...")
-opt = SGD(learning_rate=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
-model.compile(loss="binary_crossentropy", optimizer=opt,
+model.compile(loss="binary_crossentropy", optimizer="adam",
 	metrics=["accuracy"])
 
 # Trainieren des FC Modells für einige Epochen, alle anderen Layers sind
 # "eingefroren", dies ermöglicht dem FC Modell, mit richtigen 
 # "gelernten" Werten initialisiert zu werden im Vergleich zu random Werten
+
+# Festlegung weiterer Hyperparameter, die .fit() method startet
+# das Training
 print("[INFO] training head...")
 H = model.fit(
-	x=trainAug.flow(trainX, trainY, batch_size=32),
-	steps_per_epoch=len(trainX) // 32,
+	x=trainAug.flow(trainX, trainY, batch_size=64),
+	steps_per_epoch=len(trainX) // 64,
 	validation_data=valAug.flow(testX, testY),
-	validation_steps=len(testX) // 32,
+	validation_steps=len(testX) // 64,
 	epochs=args["epochs"])
 
 # Evaluieren des Netzes
@@ -159,7 +165,7 @@ predictions = model.predict(x=testX.astype("float32"), batch_size=32)
 print(classification_report(testY.argmax(axis=1),
 	predictions.argmax(axis=1), target_names=lb.classes_))
 
-# Darstellen des Fehlers und der Wahrscheindlichkeit
+# Darstellen des Fehlers und der Wahrscheinlichkeit
 N = args["epochs"]
 plt.style.use("ggplot")
 plt.figure()
