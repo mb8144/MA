@@ -19,6 +19,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import SGD
+from  tensorflow.keras.callbacks import ModelCheckpoint,EarlyStopping, CSVLogger
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
@@ -145,6 +146,11 @@ print("[INFO] compiling model...")
 model.compile(loss="binary_crossentropy", optimizer="adam",
 	metrics=["accuracy"])
 
+es = EarlyStopping(monitor="accuracy", min_delta = 0.01, patience = 2, verbose = 1)
+model_cp = ModelCheckpoint(filepath="best model", monitor="accuracy",
+save_best_only = True, verbose = 1, mode = "max")
+log_csv = CSVLogger("my_log.csv", separator=",", append=False)
+callbacks_list = [es, model_cp, log_csv]
 # Trainieren des FC Modells für einige Epochen, alle anderen Layers sind
 # "eingefroren", dies ermöglicht dem FC Modell, mit richtigen 
 # "gelernten" Werten initialisiert zu werden im Vergleich zu random Werten
@@ -157,6 +163,7 @@ H = model.fit(
 	steps_per_epoch=len(trainX) // 64,
 	validation_data=valAug.flow(testX, testY),
 	validation_steps=len(testX) // 64,
+	callbacks = callbacks_list,
 	epochs=args["epochs"])
 
 # Evaluieren des Netzes
