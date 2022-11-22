@@ -63,8 +63,7 @@ for image_path in image_paths:
 # Label (make oder miss) wird aus Dateiname entnommen
   label = image_path.split(os.path.sep)[-2]
 
-# Bild wird gelesen und in (224, 224) umgeformt
-# auf aspect ratio wird vorest verzichtet
+# Bild wird gelesen und in 224:224 umgeformt
   try:
    img_size = 224
    image = cv2.imread(image_path)
@@ -75,7 +74,8 @@ for image_path in image_paths:
 # in entsprechende Liste
    data.append(image)
    labels.append(label)
-    
+
+# Falls Bild nicht umgeformt werden kann
   except:
     print(f"{image_path} is not working.")
                 
@@ -116,8 +116,6 @@ trainAug.mean = mean
 valAug.mean = mean
 
 # ResNet-50 network wird geladen(Transfer Learning)
-# FC Layer wird bewusst weggelassen, damit man
-# es selbst bestimmen kann
 baseModel = ResNet50(weights="imagenet", include_top=False,
 	input_tensor=Input(shape=(224, 224, 3)))
 
@@ -138,7 +136,7 @@ model = Model(inputs=baseModel.input, outputs=headModel)
 for layer in baseModel.layers:
 	layer.trainable = False
 
-opt = SGD(learning_rate=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
+# opt = SGD(learning_rate=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
 # compile model(Erstellen des Modells)
 # einige der Hyperparameter werden hier festgelegt
 
@@ -159,10 +157,10 @@ callbacks_list = [es, model_cp, log_csv]
 # das Training
 print("[INFO] training head...")
 H = model.fit(
-	x=trainAug.flow(trainX, trainY, batch_size=64),
-	steps_per_epoch=len(trainX) // 64,
+	x=trainAug.flow(trainX, trainY, batch_size=32),
+	steps_per_epoch=len(trainX) // 32,
 	validation_data=valAug.flow(testX, testY),
-	validation_steps=len(testX) // 64,
+	validation_steps=len(testX) // 32,
 	callbacks = callbacks_list,
 	epochs=args["epochs"])
 
