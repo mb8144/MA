@@ -119,7 +119,8 @@ valAug.mean = mean
 baseModel = ResNet50(weights="imagenet", include_top=False,
 	input_tensor=Input(shape=(224, 224, 3)))
 
-# Festlegung des 'headModel', welches an 'baseModel'(ResNet-50) angehängt wird
+# Festlegung des 'headModel'(Fully Connected Network),
+# welches an 'baseModel'(ResNet-50) angehängt wird
 headModel = baseModel.output
 headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
 headModel = Flatten(name="flatten")(headModel)
@@ -127,7 +128,7 @@ headModel = Dense(512, activation="relu")(headModel)
 headModel = Dropout(0.5)(headModel)
 headModel = Dense(len(lb.classes_), activation="softmax")(headModel)
 
-# FC Modell an 'baseModel' angehängt
+# FC Modell wird an 'baseModel' angehängt:
 # finales Modell entsteht
 model = Model(inputs=baseModel.input, outputs=headModel)
 
