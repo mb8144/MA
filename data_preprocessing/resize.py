@@ -1,6 +1,6 @@
 """
 Skript wurde erstellt, um alle Bilder
-des finalen Datensets(ca. 16'000) suf die Grösse
+des finalen Datensets(ca. 16'000) auf die Grösse
 (224, 224) zu komprimierern.
 """
 import cv2
