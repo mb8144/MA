@@ -1,6 +1,6 @@
 '''
-Beschreibung: basketball classification (MA)
-Author:	Maurus Brunnschweiler
+basketball classification (MA)
+pyimagesearch Tutorial
 '''
 
 # Alle nötigen Libraries werden importiert
