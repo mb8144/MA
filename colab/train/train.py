@@ -190,6 +190,8 @@ print("[INFO] serializing network...")
 model.save(args["model"], save_format="h5")
 
 # Serialisieren des Label-Binarizers auf Colab
-f = open(args["label_bin"], "wb")
-f.write(pickle.dumps(lb))
-f.close()
+#f = open(args["label_bin"], "wb")
+#f.write(pickle.dumps(lb))
+#f.close()
+with open(args["label_bin"], "wb") as f:
+	f.write(pickle.dumps(lb))
