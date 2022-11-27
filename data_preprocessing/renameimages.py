@@ -13,7 +13,7 @@ path = os.chdir(inputdirpath)
 class1 = "miss"
 class2 = "make"
 
-# Bilder werden je nach Klasse untetschiedlich
+# Bilder werden je nach Klasse unterschiedlich
 # umbenannt und nummeriert
 i = 0
 for file in os.listdir(path):
