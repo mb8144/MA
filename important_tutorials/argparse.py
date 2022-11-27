@@ -1,4 +1,5 @@
-""" Dieses Skript wurde erstellt, um
+"""
+Dieses Skript wurde erstellt, um
 die Funktion der Library argparse verstehen
 und anwenden zu können.
 """ 
