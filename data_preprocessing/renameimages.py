@@ -21,5 +21,3 @@ for file in os.listdir(path):
     os.rename(file, new_file_name)
 
     i += 1
-
-    
