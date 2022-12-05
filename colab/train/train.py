@@ -1,7 +1,7 @@
 '''
 Beschreibung: basketball classification (MA)
-Author:	Maurus Brunnschweiler
-Pyimageresearch Tutorial
+Erstellen des Modells
+Von Pyimagesearch Tutorial übernommen und angepasst
 '''
 
 # matplotlib importieren für backend Aktionen
@@ -136,8 +136,9 @@ model = Model(inputs=baseModel.input, outputs=headModel)
 # !not! be updated during the training process (no backpropagation)
 for layer in baseModel.layers:
 	layer.trainable = False
-
+# möglicher optimizer:
 # opt = SGD(learning_rate=1e-4, momentum=0.9, decay=1e-4 / args["epochs"])
+
 # compile model(Erstellen des Modells)
 # einige der Hyperparameter werden hier festgelegt
 
@@ -145,14 +146,14 @@ print("[INFO] compiling model...")
 model.compile(loss="binary_crossentropy", optimizer="adam",
 	metrics=["accuracy"])
 
+# Frühzeitiger Stopp, falls Accuracy nicht verbessert wird
 es = EarlyStopping(monitor="accuracy", min_delta = 0.01, patience = 2, verbose = 1)
 model_cp = ModelCheckpoint(filepath="best model", monitor="accuracy",
 save_best_only = True, verbose = 1, mode = "max")
+
+# csv-file für Analyse der Ergebnisse
 log_csv = CSVLogger("my_log.csv", separator=",", append=False)
 callbacks_list = [es, model_cp, log_csv]
-# Trainieren des FC Modells für einige Epochen, alle anderen Layers sind
-# "eingefroren", dies ermöglicht dem FC Modell, mit richtigen 
-# "gelernten" Werten initialisiert zu werden im Vergleich zu random Werten
 
 # Festlegung weiterer Hyperparameter, die .fit() method startet
 # das Training
@@ -187,11 +188,9 @@ plt.savefig(args["plot"])
 
 # Serialisieren des Modells auf Colab
 print("[INFO] serializing network...")
+
 model.save(args["model"], save_format="h5")
 
 # Serialisieren des Label-Binarizers auf Colab
-#f = open(args["label_bin"], "wb")
-#f.write(pickle.dumps(lb))
-#f.close()
 with open(args["label_bin"], "wb") as f:
 	f.write(pickle.dumps(lb))
