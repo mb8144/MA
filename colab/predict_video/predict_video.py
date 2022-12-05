@@ -1,8 +1,9 @@
 '''
 basketball classification (MA)
-pyimagesearch Tutorial
-Code wurde noch nicht genauer betrachtet, da
-Netz nicht genug genau ist 
+Modell auf Videos anwenden
+Nicht sehr relevant, da kein genaues
+Modell erstellt werden konnte.
+Von pyimagesearch Tutorial übernommen
 '''
 
 # Alle nötigen Libraries werden importiert
@@ -33,8 +34,9 @@ args = vars(ap.parse_args())
 print("[INFO] loading model and label binarizer...")
 model = load_model(args["model"])
 lb = pickle.loads(open(args["label_bin"], "rb").read())
+
 # 'image mean' für 'mean subtraction' wird definiert und
-# Queue(deutsch: "Reihe") wird initialisiert
+# Queue ("Reihe") wird initialisiert
 mean = np.array([123.68, 116.779, 103.939][::1], dtype="float32")
 Q = deque(maxlen=args["size"])
 
@@ -67,6 +69,7 @@ while True:
 	# einzelnen Frame und die Queue aktualisiert
 	preds = model.predict(np.expand_dims(frame, axis=0))[0]
 	Q.append(preds)
+	
 	# 'Prediction Averaging' wird auf aktueller Queue durchgeführt
 	# und Klasse zugeordnet
 	results = np.array(Q).mean(axis=0)
