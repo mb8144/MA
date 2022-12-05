@@ -1,6 +1,8 @@
 '''
 basketball classification (MA)
 pyimagesearch Tutorial
+Code wurde noch nicht genauer betrachtet, da
+Netz nicht genug genau ist 
 '''
 
 # Alle nötigen Libraries werden importiert
@@ -91,7 +93,7 @@ while True:
 		break
 
 print("[INFO] cleaning up...")
-# sehr kritisch, hat zuerst mit nicht funktioniert!
+
 writer.release()
 vs.release()
 print("[INFO] The program has reached its end...")
